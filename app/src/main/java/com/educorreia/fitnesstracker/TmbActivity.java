@@ -14,42 +14,44 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.educorreia.fitnesstracker.database.DatabaseHelper;
 
-public class ImcActivity extends AppCompatActivity {
+public class TmbActivity extends AppCompatActivity {
 
-    private Button btnCalcImc;
+    private Button btnCalcTmb;
     private EditText editHeight;
     private EditText editWeight;
+    private EditText editAge;
+    private Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_imc);
+        setContentView(R.layout.activity_tmb);
 
-        editHeight = findViewById(R.id.edit_imc_height);
-        editWeight = findViewById(R.id.edit_imc_weight);
-        btnCalcImc = findViewById(R.id.btn_calc_imc);
+        editHeight = findViewById(R.id.edit_tmb_height);
+        editWeight = findViewById(R.id.edit_tmb_weight);
+        editAge = findViewById(R.id.edit_tmb_age);
+        spinner = findViewById(R.id.spn_tmb_lifestyle);
+        btnCalcTmb = findViewById(R.id.btn_calc_tmb);
 
-        btnCalcImc.setOnClickListener((view) -> {
+        btnCalcTmb.setOnClickListener((view) -> {
             if(isDataInvalid()){
                 Toast.makeText(this, R.string.fields_message, Toast.LENGTH_LONG).show();
                 return;
             }
 
-            double imc = calculateImc();
+            double tmb = calculateTmb();
 
-            int imcMessageId = imcResponse(imc);
-
-            AlertDialog dialog = new AlertDialog.Builder(ImcActivity.this)
-                    .setTitle(getString(R.string.imc_response, imc))
-                    .setMessage(imcMessageId)
+            AlertDialog dialog = new AlertDialog.Builder(TmbActivity.this)
+                    .setMessage(getString(R.string.tmb_response, tmb))
                     .setPositiveButton(R.string.save, (dialogInterface, i) -> {
                         new Thread(() -> {
-                            DatabaseHelper db = DatabaseHelper.getInstance(ImcActivity.this);
-                            long registerId = db.addRegister("imc", imc);
+                            DatabaseHelper db = DatabaseHelper.getInstance(TmbActivity.this);
+                            long registerId = db.addRegister("tmb", tmb);
 
                             runOnUiThread(() -> {
                                 if(registerId > 0) {
@@ -88,38 +90,35 @@ public class ImcActivity extends AppCompatActivity {
     }
 
     private void openRegistersList(){
-        Intent intent = new Intent(ImcActivity.this, RegistersListActivity.class);
-        intent.putExtra("type", "imc");
+        Intent intent = new Intent(TmbActivity.this, RegistersListActivity.class);
+        intent.putExtra("type", "tmb");
         startActivity(intent);
     }
 
-    private double calculateImc(){
+    private double calculateTmb(){
         final String strHeight = editHeight.getText().toString();
         final String strWeight = editWeight.getText().toString();
+        final String strAge = editAge.getText().toString();
 
         final int height = Integer.parseInt(strHeight);
         final int weight = Integer.parseInt(strWeight);
+        final int age = Integer.parseInt(strAge);
 
-        final double heightInCentimeters = (double) height / 100;
+        double tmbTemp = 66 + (weight * 13.8) + (5 * height) - (6.8 * age);
 
-        return weight / (heightInCentimeters * heightInCentimeters);
-    }
+        int spinnerIndex = spinner.getSelectedItemPosition();
 
-    @StringRes
-    private int imcResponse(double imc){
-        if(imc < 15) return R.string.imc_severely_low_weight;
-        else if(imc < 16) return R.string.imc_very_low_weight;
-        else if(imc < 18) return R.string.imc_low_weight;
-        else if(imc < 25) return R.string.imc_normal;
-        else if(imc < 30) return R.string.imc_high_weight;
-        else if(imc < 35) return R.string.imc_so_high_weight;
-        else if(imc < 40) return R.string.imc_severely_high_weight;
-        else return R.string.imc_extreme_weight;
+        double[] multipliers = new double[]{1.2, 1.375, 1.55, 1.725, 1.9};
+
+        double selectedMultiplier = multipliers[spinnerIndex];
+
+        return tmbTemp * selectedMultiplier;
     }
 
     private boolean isDataInvalid(){
         final String strHeight = editHeight.getText().toString();
         final String strWeight = editWeight.getText().toString();
+        final String strAge = editAge.getText().toString();
 
         final boolean isHeightEmpty = TextUtils.isEmpty(strHeight);
         final boolean doesHeightStartsWithZero = strHeight.startsWith("0");
@@ -127,10 +126,14 @@ public class ImcActivity extends AppCompatActivity {
         final boolean isWeightEmpty = TextUtils.isEmpty(strWeight);
         final boolean doesWeightStartsWithZero = strWeight.startsWith("0");
 
+        final boolean isAgeEmpty = TextUtils.isEmpty(strAge);
+        final boolean doesAgeStartsWithZero = strAge.startsWith("0");
+
         final boolean isHeightInvalid = isHeightEmpty || doesHeightStartsWithZero;
         final boolean isWeightInvalid = isWeightEmpty || doesWeightStartsWithZero;
+        final boolean isAgeInvalid = isAgeEmpty || doesAgeStartsWithZero;
 
-        if(isHeightInvalid || isWeightInvalid) return true;
+        if(isHeightInvalid || isWeightInvalid || isAgeInvalid) return true;
 
         return false;
     }

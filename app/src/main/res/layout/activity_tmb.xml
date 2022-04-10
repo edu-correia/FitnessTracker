@@ -15,7 +15,7 @@
         tools:context=".ImcActivity">
 
         <TextView
-            android:text="@string/imc_desc"
+            android:text="@string/tmb_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
@@ -23,17 +23,31 @@
             android:layout_marginBottom="40dp" />
 
         <EditText
-            android:id="@+id/edit_imc_weight"
+            android:id="@+id/edit_tmb_weight"
             android:hint="@string/weight"
             style="@style/EditTextForm"/>
 
         <EditText
-            android:id="@+id/edit_imc_height"
+            android:id="@+id/edit_tmb_height"
             android:hint="@string/height"
             style="@style/EditTextForm" />
 
+        <EditText
+            android:id="@+id/edit_tmb_age"
+            android:hint="@string/age"
+            style="@style/EditTextForm" />
+
+        <Spinner
+            android:id="@+id/spn_tmb_lifestyle"
+            style="@style/SpinnerForm"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:minHeight="40dp"
+            android:entries="@array/tmb_lifestyles"
+            />
+
         <Button
-            android:id="@+id/btn_calc_imc"
+            android:id="@+id/btn_calc_tmb"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_marginBottom="40dp"
